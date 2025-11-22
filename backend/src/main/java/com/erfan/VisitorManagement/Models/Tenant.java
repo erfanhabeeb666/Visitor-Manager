@@ -1,5 +1,6 @@
 package com.erfan.VisitorManagement.Models;
 
+import com.erfan.VisitorManagement.Enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -18,9 +19,19 @@ public class Tenant {
 
     private String tenantName;
     private String phoneNumber;
-    private Boolean active;
+    @Enumerated(EnumType.STRING)
+    private Status status;  // ACTIVE / INACTIVE
+    
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "building_id")
+    private Building building;
 
-    @OneToOne
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "floor_id")
+    private Floor floor;
+
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "room_id")
     private Room room;
+
 }

@@ -1,62 +1,33 @@
 package com.erfan.VisitorManagement.Exception;
 
-import org.springframework.http.HttpHeaders;
+import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
-import org.springframework.web.context.request.WebRequest;
-import org.springframework.web.server.ResponseStatusException;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
-import java.time.Instant;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-@ControllerAdvice
+@RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    private Map<String, Object> body(HttpStatus status, String message) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("timestamp", Instant.now().toString());
-        map.put("status", status.value());
-        map.put("error", status.getReasonPhrase());
-        map.put("message", message);
-        return map;
+    @ExceptionHandler(ChangeSetPersister.NotFoundException.class)
+    public ResponseEntity<?> notFound(ResourceNotFoundException e){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("error", e.getMessage()));
     }
 
-    @ExceptionHandler(ResponseStatusException.class)
-    public ResponseEntity<Object> handleResponseStatus(ResponseStatusException ex) {
-        HttpStatus status = HttpStatus.resolve(ex.getStatusCode().value());
-        if (status == null) status = HttpStatus.BAD_REQUEST;
-        return new ResponseEntity<>(body(status, ex.getReason()), status);
+    @ExceptionHandler(BadRequestException.class)
+    public ResponseEntity<?> badRequest(BadRequestException e){
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Object> handleValidation(MethodArgumentNotValidException ex, WebRequest request) {
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        Map<String, Object> map = body(status, "Validation failed");
-        Map<String, String> fieldErrors = ex.getBindingResult().getFieldErrors().stream()
-                .collect(Collectors.toMap(
-                        fe -> fe.getField(),
-                        fe -> fe.getDefaultMessage(),
-                        (a, b) -> a
-                ));
-        map.put("fieldErrors", fieldErrors);
-        return new ResponseEntity<>(map, new HttpHeaders(), status);
-    }
-
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ResponseEntity<Object> handleIllegalArgument(IllegalArgumentException ex) {
-        HttpStatus status = HttpStatus.BAD_REQUEST;
-        return new ResponseEntity<>(body(status, ex.getMessage()), status);
-    }
-
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<Object> handleRuntime(RuntimeException ex) {
-        // Last resort: avoid leaking stacktraces to the client
-        HttpStatus status = HttpStatus.INTERNAL_SERVER_ERROR;
-        return new ResponseEntity<>(body(status, ex.getMessage() != null ? ex.getMessage() : "Unexpected error"), status);
+    public ResponseEntity<?> validation(MethodArgumentNotValidException e) {
+        var errors = e.getBindingResult().getFieldErrors().stream()
+                .collect(Collectors.toMap(FieldError::getField, FieldError::getDefaultMessage));
+        return ResponseEntity.badRequest().body(Map.of("errors", errors));
     }
 }

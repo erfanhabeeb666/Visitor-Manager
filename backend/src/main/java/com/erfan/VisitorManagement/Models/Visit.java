@@ -24,6 +24,10 @@ public class Visit {
 
     private LocalDateTime visitDateTime;
     private LocalDateTime expiryTime;
+    private LocalDateTime checkInTime;
+    private LocalDateTime checkOutTime;
+    private Security checkedInSecurity;
+    private Security checkedOutSecurity;
 
     @Enumerated(EnumType.STRING)
     private VisitStatus status;
