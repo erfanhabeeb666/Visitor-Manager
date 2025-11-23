@@ -4,12 +4,13 @@ package com.erfan.VisitorManagement.Repos;
 import com.erfan.VisitorManagement.Enums.VisitStatus;
 import com.erfan.VisitorManagement.Models.Visit;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
-public interface VisitRepository extends JpaRepository<Visit, Long> {
+public interface VisitRepository extends JpaRepository<Visit, Long>, JpaSpecificationExecutor<Visit> {
 
     List<Visit> findByTenantIdOrderByVisitDateTimeDesc(Long tenantId);
 
@@ -28,5 +29,7 @@ public interface VisitRepository extends JpaRepository<Visit, Long> {
     Optional<Visit> findByQrCodePath(String qrPath);
 
     List<Visit> findByStatusIn(List<VisitStatus> pending);
+
+    long deleteByCreatedAtBefore(LocalDateTime cutoff);
 }
 

@@ -35,10 +35,14 @@ public class VisitResponseDto {
     private Long roomId;
     private String roomNumber;
     public static VisitResponseDto fromEntity(Visit v) {
+        String phone = v.getVisitorPhone();
+        if (v.getExpiryTime() != null && v.getExpiryTime().isBefore(LocalDateTime.now())) {
+            phone = maskPhone(phone);
+        }
         return VisitResponseDto.builder()
                 .id(v.getId())
                 .visitorName(v.getVisitorName())
-                .visitorPhone(v.getVisitorPhone())
+                .visitorPhone(phone)
                 .visitDateTime(v.getVisitDateTime())
                 .expiryTime(v.getExpiryTime())
                 .status(v.getStatus().name())
@@ -57,5 +61,13 @@ public class VisitResponseDto {
 
                 .roomNumber(v.getRoom().getRoomNumber())
                 .build();
+    }
+
+    private static String maskPhone(String phone) {
+        if (phone == null) return null;
+        int len = phone.length();
+        if (len <= 2) return "**";
+        String last2 = phone.substring(len - 2);
+        return "*".repeat(len - 2) + last2;
     }
 }
