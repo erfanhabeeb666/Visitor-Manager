@@ -1,6 +1,7 @@
 package com.erfan.VisitorManagement.Controller;
 
 import com.erfan.VisitorManagement.Dtos.CreateBuildingDto;
+import com.erfan.VisitorManagement.Dtos.BuildingDto;
 import com.erfan.VisitorManagement.Models.Building;
 import com.erfan.VisitorManagement.Services.BuildingService;
 import jakarta.validation.Valid;
@@ -20,18 +21,21 @@ public class AdminBuildingController {
     private final BuildingService buildingService;
 
     @PostMapping
-    public ResponseEntity<Building> create(@Valid @RequestBody CreateBuildingDto dto){
-        return ResponseEntity.status(HttpStatus.CREATED).body(buildingService.createBuilding(dto));
+    public ResponseEntity<BuildingDto> create(@Valid @RequestBody CreateBuildingDto dto){
+        Building created = buildingService.createBuilding(dto);
+        return ResponseEntity.status(HttpStatus.CREATED).body(BuildingDto.fromEntity(created));
     }
 
     @GetMapping
-    public ResponseEntity<Page<Building>> list(Pageable pageable){
-        return ResponseEntity.ok(buildingService.listBuildings(pageable));
+    public ResponseEntity<Page<BuildingDto>> list(Pageable pageable){
+        Page<BuildingDto> page = buildingService.listBuildings(pageable).map(BuildingDto::fromEntity);
+        return ResponseEntity.ok(page);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Building> update(@PathVariable Long id, @Valid @RequestBody CreateBuildingDto dto){
-        return ResponseEntity.ok(buildingService.updateBuilding(id, dto));
+    public ResponseEntity<BuildingDto> update(@PathVariable Long id, @Valid @RequestBody CreateBuildingDto dto){
+        Building updated = buildingService.updateBuilding(id, dto);
+        return ResponseEntity.ok(BuildingDto.fromEntity(updated));
     }
 
     @DeleteMapping("/{id}")

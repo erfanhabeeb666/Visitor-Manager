@@ -3,9 +3,11 @@ package com.erfan.VisitorManagement.Models;
 import com.erfan.VisitorManagement.Enums.Status;
 import jakarta.persistence.*;
 import lombok.*;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
 @Entity
 @Table(name = "tenants")
+@JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
 @Getter
 @Setter
 @NoArgsConstructor

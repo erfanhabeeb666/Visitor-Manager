@@ -61,6 +61,9 @@ public class TenantServiceImpl implements TenantService {
         if (updated.getRoomId() != null) {
             Room room = roomRepository.getById(updated.getRoomId());
             existing.setRoom(room);
+            // keep denormalized references in sync
+            existing.setFloor(room.getFloor());
+            existing.setBuilding(room.getFloor().getBuilding());
         }
 
         return tenantRepository.save(existing);
