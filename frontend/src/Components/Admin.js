@@ -5,6 +5,7 @@ import Tenants from "./admin/Tenants";
 import Floors from "./admin/Floors";
 import Rooms from "./admin/Rooms";
 import SecurityUsers from "./admin/SecurityUsers";
+import { jwtDecode } from "jwt-decode";
 
 const sections = [
   { key: "buildings", label: "Buildings" },
@@ -17,6 +18,17 @@ const sections = [
 const Admin = () => {
   const navigate = useNavigate();
   const [active, setActive] = React.useState("buildings");
+  const [userName, setUserName] = React.useState("");
+
+  React.useEffect(() => {
+    try {
+      const token = localStorage.getItem("jwtToken");
+      if (token) {
+        const decoded = jwtDecode(token);
+        if (decoded && decoded.name) setUserName(decoded.name);
+      }
+    } catch (_) {}
+  }, []);
 
   const renderSection = () => {
     switch (active) {
@@ -36,38 +48,41 @@ const Admin = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100">
+    <div className="min-h-screen">
       <header className="bg-white shadow">
-        <div className="mx-auto max-w-7xl px-4 py-4 flex items-center justify-between">
+        <div className="container-app py-4 flex items-center justify-between">
           <h1 className="text-2xl font-semibold">Admin Dashboard</h1>
-          <button
-            onClick={() => {
-              localStorage.removeItem("jwtToken");
-              navigate("/");
-            }}
-            className="rounded bg-gray-800 text-white px-4 py-2"
-          >
-            Logout
-          </button>
+          <div className="flex items-center gap-4">
+            <span className="text-gray-600">Hello, {userName || "Admin"}</span>
+            <button
+              onClick={() => {
+                localStorage.removeItem("jwtToken");
+                navigate("/");
+              }}
+              className="btn btn-neutral"
+            >
+              Logout
+            </button>
+          </div>
         </div>
       </header>
-      <div className="mx-auto max-w-7xl px-4 py-6 grid grid-cols-1 md:grid-cols-4 gap-6">
-        <aside className="md:col-span-1 bg-white shadow rounded p-3">
-          <nav className="space-y-1">
-            {sections.map((s) => (
-              <button
-                key={s.key}
-                onClick={() => setActive(s.key)}
-                className={`${
-                  active === s.key
-                    ? "bg-primary-50 text-primary-700 border-primary-200"
-                    : "bg-white text-gray-700 hover:bg-gray-50"
-                } w-full text-left border rounded px-3 py-2`}
-              >
-                {s.label}
-              </button>
-            ))}
-          </nav>
+      <div className="container-app py-6 grid grid-cols-1 md:grid-cols-4 gap-6">
+        <aside className="md:col-span-1 card">
+          <div className="card-body p-3">
+            <nav className="space-y-2">
+              {sections.map((s) => (
+                <button
+                  key={s.key}
+                  onClick={() => setActive(s.key)}
+                  className={`w-full text-left btn ${
+                    active === s.key ? 'btn-primary' : 'btn-outline'
+                  }`}
+                >
+                  {s.label}
+                </button>
+              ))}
+            </nav>
+          </div>
         </aside>
         <main className="md:col-span-3 space-y-6">{renderSection()}</main>
       </div>

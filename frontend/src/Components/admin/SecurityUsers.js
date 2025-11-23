@@ -72,56 +72,59 @@ export default function SecurityUsers() {
     <div className="space-y-6">
       <h2 className="text-xl font-semibold">Security Users</h2>
 
-      <form onSubmit={onSubmit} className="bg-white shadow rounded p-4 grid grid-cols-1 md:grid-cols-5 gap-4">
-        <div>
-          <label className="block text-sm font-medium mb-1">Name</label>
-          <input className="w-full rounded border border-gray-300 px-3 py-2" value={form.name} onChange={(e)=>setForm({...form, name:e.target.value})} required/>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Email</label>
-          <input type="email" className="w-full rounded border border-gray-300 px-3 py-2" value={form.email} onChange={(e)=>setForm({...form, email:e.target.value})} required/>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Password</label>
-          <input type="password" className="w-full rounded border border-gray-300 px-3 py-2" value={form.password} onChange={(e)=>setForm({...form, password:e.target.value})} placeholder={isEditing ? '(leave blank to keep unchanged)' : ''} required={!isEditing}/>
-        </div>
-        <div>
-          <label className="block text-sm font-medium mb-1">Aadhaar UID</label>
-          <input className="w-full rounded border border-gray-300 px-3 py-2" value={form.adharUid} onChange={(e)=>setForm({...form, adharUid:e.target.value.replace(/\D/g,'')})} pattern="\d{12}" title="Aadhaar must be exactly 12 digits" maxLength={12} required/>
-        </div>
-        <div className="md:col-span-5 flex items-end gap-2">
-          <button type="submit" className="rounded bg-primary-600 hover:bg-primary-700 text-white px-4 py-2" disabled={loading || !canSubmit}>{isEditing ? 'Update' : 'Create'}</button>
-          {isEditing && (
-            <button type="button" className="rounded border border-gray-300 px-4 py-2" onClick={onCancel} disabled={loading}>Cancel</button>
-          )}
+      <form onSubmit={onSubmit} className="card">
+        <div className="card-body grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div>
+            <label>Name</label>
+            <input className="input" value={form.name} onChange={(e)=>setForm({...form, name:e.target.value})} required/>
+          </div>
+          <div>
+            <label>Email</label>
+            <input type="email" className="input" value={form.email} onChange={(e)=>setForm({...form, email:e.target.value})} required/>
+          </div>
+          <div>
+            <label>Password</label>
+            <input type="password" className="input" value={form.password} onChange={(e)=>setForm({...form, password:e.target.value})} placeholder={isEditing ? '(leave blank to keep unchanged)' : ''} required={!isEditing}/>
+          </div>
+          <div>
+            <label>Aadhaar UID</label>
+            <input className="input" value={form.adharUid} onChange={(e)=>setForm({...form, adharUid:e.target.value.replace(/\D/g,'')})} pattern="\d{12}" title="Aadhaar must be exactly 12 digits" maxLength={12} required/>
+          </div>
+          <div className="md:col-span-5 flex items-end gap-2">
+            <button type="submit" className="btn btn-primary" disabled={loading || !canSubmit}>{isEditing ? 'Update' : 'Create'}</button>
+            {isEditing && (
+              <button type="button" className="btn btn-outline" onClick={onCancel} disabled={loading}>Cancel</button>
+            )}
+          </div>
         </div>
       </form>
 
       {error && <div className="rounded bg-red-50 text-red-700 px-3 py-2 text-sm">{error}</div>}
 
-      <div className="bg-white shadow rounded overflow-hidden">
-        <table className="min-w-full">
-          <thead className="bg-gray-50 text-left text-sm text-gray-600">
+      <div className="card overflow-hidden">
+        <div className="card-body p-0">
+        <table className="table">
+          <thead>
             <tr>
-              <th className="px-4 py-3">ID</th>
-              <th className="px-4 py-3">Name</th>
-              <th className="px-4 py-3">Email</th>
-              <th className="px-4 py-3">Aadhaar UID</th>
-              <th className="px-4 py-3">Status</th>
+              <th>ID</th>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Aadhaar UID</th>
+              <th>Status</th>
             </tr>
           </thead>
           <tbody>
             {items.map(u => (
-              <tr key={u.id} className="border-t">
-                <td className="px-4 py-3">{u.id}</td>
-                <td className="px-4 py-3">{u.name}</td>
-                <td className="px-4 py-3">{u.email}</td>
-                <td className="px-4 py-3">{u.adharUid}</td>
-                <td className="px-4 py-3">
+              <tr key={u.id} className="table-row">
+                <td>{u.id}</td>
+                <td>{u.name}</td>
+                <td>{u.email}</td>
+                <td>{u.adharUid}</td>
+                <td>
                   <div className="flex items-center gap-3">
                     <span>{u.status}</span>
-                    <button className="text-primary-700 hover:underline" onClick={() => onEdit(u)}>Edit</button>
-                    <button className="text-red-600 hover:underline" onClick={() => onDelete(u.id)}>Delete</button>
+                    <button className="btn btn-outline" onClick={() => onEdit(u)}>Edit</button>
+                    <button className="btn btn-danger" onClick={() => onDelete(u.id)}>Delete</button>
                   </div>
                 </td>
               </tr>
@@ -131,6 +134,7 @@ export default function SecurityUsers() {
             )}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   );
