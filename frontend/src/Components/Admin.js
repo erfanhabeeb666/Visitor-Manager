@@ -4,12 +4,14 @@ import Buildings from "./admin/Buildings";
 import Tenants from "./admin/Tenants";
 import Floors from "./admin/Floors";
 import Rooms from "./admin/Rooms";
+import SecurityUsers from "./admin/SecurityUsers";
 
 const sections = [
   { key: "buildings", label: "Buildings" },
   { key: "tenants", label: "Tenants" },
   { key: "floors", label: "Floors" },
   { key: "rooms", label: "Rooms" },
+  { key: "security-users", label: "Security Users" },
 ];
 
 const Admin = () => {
@@ -26,6 +28,8 @@ const Admin = () => {
         return <Floors />;
       case "rooms":
         return <Rooms />;
+      case "security-users":
+        return <SecurityUsers />;
       default:
         return null;
     }
