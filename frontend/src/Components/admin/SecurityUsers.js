@@ -1,10 +1,14 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import api from '../../lib/api';
+import { toast } from '../../lib/toast';
 
 export default function SecurityUsers() {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [search, setSearch] = useState('');
+  const [page, setPage] = useState(0);
+  const pageSize = 10;
 
   const [form, setForm] = useState({ id: null, name: '', email: '', password: '', adharUid: '' });
   const isEditing = useMemo(() => form.id !== null, [form.id]);
@@ -36,6 +40,7 @@ export default function SecurityUsers() {
           password: form.password, // optional on backend; can be blank to keep existing
           adharUid: form.adharUid,
         });
+        toast.success('Security user updated');
       } else {
         await api.post('/api/admin/security-users', {
           name: form.name,
@@ -43,6 +48,7 @@ export default function SecurityUsers() {
           password: form.password,
           adharUid: form.adharUid,
         });
+        toast.success('Security user created');
       }
       setForm({ id: null, name: '', email: '', password: '', adharUid: '' });
       await loadItems();
@@ -64,9 +70,24 @@ export default function SecurityUsers() {
       setError('');
       await api.delete(`/api/admin/security-users/${id}`);
       await loadItems();
+      toast.success('Security user deleted');
     } catch (e) { setError(e.response?.data?.message || 'Delete failed'); }
     finally { setLoading(false); }
   };
+
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return items;
+    return items.filter(u =>
+      (u.name || '').toLowerCase().includes(q) ||
+      (u.email || '').toLowerCase().includes(q) ||
+      (u.adharUid || '').toLowerCase().includes(q)
+    );
+  }, [items, search]);
+
+  const totalPages = Math.max(1, Math.ceil(filtered.length / pageSize));
+  const currentPage = Math.min(page, totalPages - 1);
+  const pageItems = useMemo(() => filtered.slice(currentPage * pageSize, (currentPage + 1) * pageSize), [filtered, currentPage]);
 
   return (
     <div className="space-y-6">
@@ -102,19 +123,29 @@ export default function SecurityUsers() {
       {error && <div className="rounded bg-red-50 text-red-700 px-3 py-2 text-sm">{error}</div>}
 
       <div className="card overflow-hidden">
-        <div className="card-body p-0">
-        <table className="table">
-          <thead>
-            <tr>
-              <th>ID</th>
-              <th>Name</th>
-              <th>Email</th>
-              <th>Aadhaar UID</th>
-              <th>Status</th>
-            </tr>
-          </thead>
-          <tbody>
-            {items.map(u => (
+        <div className="card-body">
+          <div className="flex items-center justify-between mb-3">
+            <input
+              className="input max-w-sm"
+              placeholder="Search by name, email, Aadhaar"
+              value={search}
+              onChange={(e)=>{ setSearch(e.target.value); setPage(0); }}
+            />
+            <div className="text-sm text-gray-600">{filtered.length} result(s)</div>
+          </div>
+          <div className="overflow-x-auto">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Aadhaar UID</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+            {pageItems.map(u => (
               <tr key={u.id} className="table-row">
                 <td>{u.id}</td>
                 <td>{u.name}</td>
@@ -129,11 +160,19 @@ export default function SecurityUsers() {
                 </td>
               </tr>
             ))}
-            {items.length === 0 && !loading && (
+            {pageItems.length === 0 && !loading && (
               <tr><td className="px-4 py-3 text-gray-500" colSpan={5}>No security users found.</td></tr>
             )}
-          </tbody>
-        </table>
+            </tbody>
+          </table>
+          </div>
+          <div className="flex items-center justify-between mt-3 text-sm">
+            <div>Page {currentPage + 1} of {totalPages}</div>
+            <div className="space-x-2">
+              <button className="btn btn-outline" disabled={currentPage === 0} onClick={()=>setPage(p=>Math.max(0,p-1))}>Previous</button>
+              <button className="btn btn-outline" disabled={currentPage >= totalPages - 1} onClick={()=>setPage(p=>Math.min(totalPages-1,p+1))}>Next</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
